@@ -99,19 +99,30 @@ class EmailEditor {
             addTextOverlayBtn.addEventListener('click', () => this.addTextOverlay());
         }
 
-        // Color overlay controls
+        // Color overlay controls with real-time preview
         const opacitySlider = document.getElementById('color-overlay-opacity');
         const opacityValue = document.getElementById('opacity-value');
+        const colorPicker = document.getElementById('color-overlay-color');
+
         if (opacitySlider && opacityValue) {
             opacitySlider.addEventListener('input', (e) => {
                 opacityValue.textContent = e.target.value + '%';
+                // Update overlay in real-time
+                this.updateColorOverlayPreview();
+            });
+        }
+
+        if (colorPicker) {
+            colorPicker.addEventListener('input', () => {
+                // Update overlay in real-time when color changes
+                this.updateColorOverlayPreview();
             });
         }
 
         const addColorOverlayBtn = document.getElementById('add-color-overlay-btn');
         const removeColorOverlayBtn = document.getElementById('remove-color-overlay-btn');
         if (addColorOverlayBtn) {
-            addColorOverlayBtn.addEventListener('click', () => this.addColorOverlay());
+            addColorOverlayBtn.addEventListener('click', () => this.commitColorOverlay());
         }
         if (removeColorOverlayBtn) {
             removeColorOverlayBtn.addEventListener('click', () => this.removeColorOverlay());
@@ -747,45 +758,103 @@ class EmailEditor {
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
 
-        const startDraw = (e) => {
+        const getCanvasCoords = (e) => {
             const rect = canvas.getBoundingClientRect();
-            this.cropSelection.startX = e.clientX - rect.left;
-            this.cropSelection.startY = e.clientY - rect.top;
+            // Account for canvas scaling
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        };
+
+        const startDraw = (e) => {
+            const coords = getCanvasCoords(e);
+            this.cropSelection.startX = coords.x;
+            this.cropSelection.startY = coords.y;
+            this.cropSelection.endX = coords.x;
+            this.cropSelection.endY = coords.y;
             this.cropSelection.active = true;
             isDrawing = true;
+
+            console.log('Crop started at:', coords);
         };
 
         const draw = (e) => {
             if (!isDrawing) return;
 
-            const rect = canvas.getBoundingClientRect();
-            this.cropSelection.endX = e.clientX - rect.left;
-            this.cropSelection.endY = e.clientY - rect.top;
+            const coords = getCanvasCoords(e);
+            this.cropSelection.endX = coords.x;
+            this.cropSelection.endY = coords.y;
 
             // Redraw image and selection rectangle
             ctx.putImageData(this.workingImageData, 0, 0);
 
+            // Apply color overlay preview if active
+            if (this.colorOverlayPreviewActive) {
+                const color = document.getElementById('color-overlay-color').value;
+                const opacity = document.getElementById('color-overlay-opacity').value / 100;
+                ctx.fillStyle = color;
+                ctx.globalAlpha = opacity;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1.0;
+            }
+
+            // Calculate rectangle dimensions
+            const x = Math.min(this.cropSelection.startX, this.cropSelection.endX);
+            const y = Math.min(this.cropSelection.startY, this.cropSelection.endY);
+            const width = Math.abs(this.cropSelection.endX - this.cropSelection.startX);
+            const height = Math.abs(this.cropSelection.endY - this.cropSelection.startY);
+
+            // Draw semi-transparent overlay over non-selected area
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            // Top
+            ctx.fillRect(0, 0, canvas.width, y);
+            // Bottom
+            ctx.fillRect(0, y + height, canvas.width, canvas.height - (y + height));
+            // Left
+            ctx.fillRect(0, y, x, height);
+            // Right
+            ctx.fillRect(x + width, y, canvas.width - (x + width), height);
+
             // Draw selection rectangle
             ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(
-                this.cropSelection.startX,
-                this.cropSelection.startY,
-                this.cropSelection.endX - this.cropSelection.startX,
-                this.cropSelection.endY - this.cropSelection.startY
-            );
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 4]);
+            ctx.strokeRect(x, y, width, height);
             ctx.setLineDash([]);
+
+            // Draw corner handles
+            const handleSize = 10;
+            ctx.fillStyle = '#667eea';
+            // Top-left
+            ctx.fillRect(x - handleSize/2, y - handleSize/2, handleSize, handleSize);
+            // Top-right
+            ctx.fillRect(x + width - handleSize/2, y - handleSize/2, handleSize, handleSize);
+            // Bottom-left
+            ctx.fillRect(x - handleSize/2, y + height - handleSize/2, handleSize, handleSize);
+            // Bottom-right
+            ctx.fillRect(x + width - handleSize/2, y + height - handleSize/2, handleSize, handleSize);
         };
 
         const stopDraw = () => {
+            if (isDrawing) {
+                const width = Math.abs(this.cropSelection.endX - this.cropSelection.startX);
+                const height = Math.abs(this.cropSelection.endY - this.cropSelection.startY);
+                console.log('Crop ended. Selection size:', width, 'x', height);
+            }
             isDrawing = false;
         };
 
         // Remove old listeners if any
-        canvas.removeEventListener('mousedown', this.cropMouseDown);
-        canvas.removeEventListener('mousemove', this.cropMouseMove);
-        canvas.removeEventListener('mouseup', this.cropMouseUp);
+        if (this.cropMouseDown) {
+            canvas.removeEventListener('mousedown', this.cropMouseDown);
+            canvas.removeEventListener('mousemove', this.cropMouseMove);
+            canvas.removeEventListener('mouseup', this.cropMouseUp);
+            canvas.removeEventListener('mouseleave', this.cropMouseUp);
+        }
 
         // Store listeners for removal later
         this.cropMouseDown = startDraw;
@@ -795,6 +864,7 @@ class EmailEditor {
         canvas.addEventListener('mousedown', startDraw);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
     }
 
     applyCrop() {
@@ -843,6 +913,7 @@ class EmailEditor {
             canvas.removeEventListener('mousedown', this.cropMouseDown);
             canvas.removeEventListener('mousemove', this.cropMouseMove);
             canvas.removeEventListener('mouseup', this.cropMouseUp);
+            canvas.removeEventListener('mouseleave', this.cropMouseUp);
         }
 
         // Show/hide buttons
@@ -853,6 +924,11 @@ class EmailEditor {
         // Redraw without selection
         const ctx = canvas.getContext('2d');
         ctx.putImageData(this.workingImageData, 0, 0);
+
+        // Restore color overlay preview if it was active
+        if (this.colorOverlayPreviewActive) {
+            this.updateColorOverlayPreview();
+        }
 
         this.cropSelection = null;
     }
@@ -902,7 +978,9 @@ class EmailEditor {
         this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
 
-    addColorOverlay() {
+    updateColorOverlayPreview() {
+        if (!this.workingImageData) return;
+
         const canvas = document.getElementById('image-editor-canvas');
         const ctx = canvas.getContext('2d');
 
@@ -918,17 +996,30 @@ class EmailEditor {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.globalAlpha = 1.0;
 
-        this.colorOverlayActive = true;
+        this.colorOverlayPreviewActive = true;
+    }
+
+    commitColorOverlay() {
+        // Make the overlay permanent by updating working image data
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        this.colorOverlayPreviewActive = false;
+
+        alert('Color overlay applied! You can add more overlays or save your changes.');
     }
 
     removeColorOverlay() {
+        if (!this.workingImageData) return;
+
         const canvas = document.getElementById('image-editor-canvas');
         const ctx = canvas.getContext('2d');
 
         // Restore working image without overlay
         ctx.putImageData(this.workingImageData, 0, 0);
 
-        this.colorOverlayActive = false;
+        this.colorOverlayPreviewActive = false;
     }
 
     resetImage() {
@@ -940,11 +1031,16 @@ class EmailEditor {
 
     saveEditedImage() {
         const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
 
-        // If color overlay is active, we need to commit it to working image data
-        if (this.colorOverlayActive) {
-            const ctx = canvas.getContext('2d');
+        // If color overlay preview is active, apply it first
+        if (this.colorOverlayPreviewActive) {
+            // The overlay is already drawn on canvas, just update working data
             this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            this.colorOverlayPreviewActive = false;
+        } else {
+            // Make sure canvas shows the current working image
+            ctx.putImageData(this.workingImageData, 0, 0);
         }
 
         // Convert canvas to data URL
