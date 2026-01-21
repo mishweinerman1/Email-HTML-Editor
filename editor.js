@@ -55,6 +55,77 @@ class EmailEditor {
         if (generateBtn) {
             generateBtn.addEventListener('click', () => this.generateImage());
         }
+
+        // Image edit controls
+        document.querySelectorAll('button[data-edit-target]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget.dataset.editTarget;
+                console.log('Edit button clicked:', target);
+                this.openImageEditor(target);
+            });
+        });
+
+        // Image editor controls
+        this.setupImageEditorControls();
+    }
+
+    setupImageEditorControls() {
+        // Crop controls
+        const startCropBtn = document.getElementById('start-crop-btn');
+        const applyCropBtn = document.getElementById('apply-crop-btn');
+        const cancelCropBtn = document.getElementById('cancel-crop-btn');
+
+        if (startCropBtn) {
+            startCropBtn.addEventListener('click', () => this.startCropping());
+        }
+        if (applyCropBtn) {
+            applyCropBtn.addEventListener('click', () => this.applyCrop());
+        }
+        if (cancelCropBtn) {
+            cancelCropBtn.addEventListener('click', () => this.cancelCrop());
+        }
+
+        // Text overlay controls
+        const textSizeSlider = document.getElementById('overlay-text-size');
+        const textSizeValue = document.getElementById('text-size-value');
+        if (textSizeSlider && textSizeValue) {
+            textSizeSlider.addEventListener('input', (e) => {
+                textSizeValue.textContent = e.target.value + 'px';
+            });
+        }
+
+        const addTextOverlayBtn = document.getElementById('add-text-overlay-btn');
+        if (addTextOverlayBtn) {
+            addTextOverlayBtn.addEventListener('click', () => this.addTextOverlay());
+        }
+
+        // Color overlay controls
+        const opacitySlider = document.getElementById('color-overlay-opacity');
+        const opacityValue = document.getElementById('opacity-value');
+        if (opacitySlider && opacityValue) {
+            opacitySlider.addEventListener('input', (e) => {
+                opacityValue.textContent = e.target.value + '%';
+            });
+        }
+
+        const addColorOverlayBtn = document.getElementById('add-color-overlay-btn');
+        const removeColorOverlayBtn = document.getElementById('remove-color-overlay-btn');
+        if (addColorOverlayBtn) {
+            addColorOverlayBtn.addEventListener('click', () => this.addColorOverlay());
+        }
+        if (removeColorOverlayBtn) {
+            removeColorOverlayBtn.addEventListener('click', () => this.removeColorOverlay());
+        }
+
+        // Reset and save
+        const resetBtn = document.getElementById('reset-image-btn');
+        const saveBtn = document.getElementById('save-edited-image-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetImage());
+        }
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveEditedImage());
+        }
     }
 
     getDefaultConfig() {
@@ -598,6 +669,294 @@ class EmailEditor {
         const statusDiv = document.getElementById('generation-status');
         statusDiv.className = `generation-status show ${type}`;
         statusDiv.textContent = message;
+    }
+
+    // Image Editor Functions
+    openImageEditor(targetId) {
+        console.log('Opening image editor for:', targetId);
+
+        // Store the current target
+        this.editingImageTarget = targetId;
+
+        // Get the current image
+        let imageData;
+        if (this.config.images && this.config.images[targetId]) {
+            imageData = this.config.images[targetId];
+        } else {
+            // No image yet, show error
+            alert('Please upload or generate an image first before editing.');
+            return;
+        }
+
+        // Load image into canvas
+        this.loadImageToCanvas(imageData);
+
+        // Show modal
+        const modal = document.getElementById('image-editor-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    loadImageToCanvas(imageData) {
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const img = new Image();
+        img.onload = () => {
+            // Store original image
+            this.originalImage = img;
+            this.currentImage = img;
+
+            // Set canvas size to image size (max 800px width)
+            const maxWidth = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+                const ratio = maxWidth / width;
+                width = maxWidth;
+                height = height * ratio;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Draw image
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Store working canvas state
+            this.workingImageData = ctx.getImageData(0, 0, width, height);
+            this.colorOverlayActive = false;
+        };
+        img.src = imageData;
+    }
+
+    startCropping() {
+        const canvas = document.getElementById('image-editor-canvas');
+        canvas.classList.add('cropping');
+
+        // Show/hide buttons
+        document.getElementById('start-crop-btn').style.display = 'none';
+        document.getElementById('apply-crop-btn').style.display = 'block';
+        document.getElementById('cancel-crop-btn').style.display = 'block';
+
+        // Setup crop selection
+        this.cropSelection = { startX: 0, startY: 0, endX: 0, endY: 0, active: false };
+
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        const startDraw = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            this.cropSelection.startX = e.clientX - rect.left;
+            this.cropSelection.startY = e.clientY - rect.top;
+            this.cropSelection.active = true;
+            isDrawing = true;
+        };
+
+        const draw = (e) => {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            this.cropSelection.endX = e.clientX - rect.left;
+            this.cropSelection.endY = e.clientY - rect.top;
+
+            // Redraw image and selection rectangle
+            ctx.putImageData(this.workingImageData, 0, 0);
+
+            // Draw selection rectangle
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(
+                this.cropSelection.startX,
+                this.cropSelection.startY,
+                this.cropSelection.endX - this.cropSelection.startX,
+                this.cropSelection.endY - this.cropSelection.startY
+            );
+            ctx.setLineDash([]);
+        };
+
+        const stopDraw = () => {
+            isDrawing = false;
+        };
+
+        // Remove old listeners if any
+        canvas.removeEventListener('mousedown', this.cropMouseDown);
+        canvas.removeEventListener('mousemove', this.cropMouseMove);
+        canvas.removeEventListener('mouseup', this.cropMouseUp);
+
+        // Store listeners for removal later
+        this.cropMouseDown = startDraw;
+        this.cropMouseMove = draw;
+        this.cropMouseUp = stopDraw;
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+    }
+
+    applyCrop() {
+        if (!this.cropSelection || !this.cropSelection.active) {
+            alert('Please select an area to crop first.');
+            return;
+        }
+
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Calculate crop dimensions
+        const x = Math.min(this.cropSelection.startX, this.cropSelection.endX);
+        const y = Math.min(this.cropSelection.startY, this.cropSelection.endY);
+        const width = Math.abs(this.cropSelection.endX - this.cropSelection.startX);
+        const height = Math.abs(this.cropSelection.endY - this.cropSelection.startY);
+
+        if (width < 10 || height < 10) {
+            alert('Crop area is too small.');
+            return;
+        }
+
+        // Get cropped image data
+        const croppedData = ctx.getImageData(x, y, width, height);
+
+        // Resize canvas to cropped size
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw cropped image
+        ctx.putImageData(croppedData, 0, 0);
+
+        // Update working image data
+        this.workingImageData = ctx.getImageData(0, 0, width, height);
+
+        // Exit crop mode
+        this.cancelCrop();
+    }
+
+    cancelCrop() {
+        const canvas = document.getElementById('image-editor-canvas');
+        canvas.classList.remove('cropping');
+
+        // Remove event listeners
+        if (this.cropMouseDown) {
+            canvas.removeEventListener('mousedown', this.cropMouseDown);
+            canvas.removeEventListener('mousemove', this.cropMouseMove);
+            canvas.removeEventListener('mouseup', this.cropMouseUp);
+        }
+
+        // Show/hide buttons
+        document.getElementById('start-crop-btn').style.display = 'block';
+        document.getElementById('apply-crop-btn').style.display = 'none';
+        document.getElementById('cancel-crop-btn').style.display = 'none';
+
+        // Redraw without selection
+        const ctx = canvas.getContext('2d');
+        ctx.putImageData(this.workingImageData, 0, 0);
+
+        this.cropSelection = null;
+    }
+
+    addTextOverlay() {
+        const text = document.getElementById('overlay-text').value;
+        if (!text.trim()) {
+            alert('Please enter text for the overlay.');
+            return;
+        }
+
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const fontSize = document.getElementById('overlay-text-size').value;
+        const color = document.getElementById('overlay-text-color').value;
+        const position = document.getElementById('overlay-text-position').value;
+
+        // Set text style
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+
+        // Calculate position
+        let x = canvas.width / 2;
+        let y;
+
+        switch (position) {
+            case 'top':
+                y = parseInt(fontSize) + 20;
+                break;
+            case 'center':
+                y = canvas.height / 2;
+                break;
+            case 'bottom':
+                y = canvas.height - 20;
+                break;
+        }
+
+        // Draw text with stroke for visibility
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+
+        // Update working image data
+        this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
+    addColorOverlay() {
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const color = document.getElementById('color-overlay-color').value;
+        const opacity = document.getElementById('color-overlay-opacity').value / 100;
+
+        // Restore working image first
+        ctx.putImageData(this.workingImageData, 0, 0);
+
+        // Add color overlay
+        ctx.fillStyle = color;
+        ctx.globalAlpha = opacity;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
+
+        this.colorOverlayActive = true;
+    }
+
+    removeColorOverlay() {
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Restore working image without overlay
+        ctx.putImageData(this.workingImageData, 0, 0);
+
+        this.colorOverlayActive = false;
+    }
+
+    resetImage() {
+        if (!this.originalImage) return;
+
+        // Reload original image
+        this.loadImageToCanvas(this.originalImage.src);
+    }
+
+    saveEditedImage() {
+        const canvas = document.getElementById('image-editor-canvas');
+
+        // If color overlay is active, we need to commit it to working image data
+        if (this.colorOverlayActive) {
+            const ctx = canvas.getContext('2d');
+            this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        // Convert canvas to data URL
+        const editedImageData = canvas.toDataURL('image/png');
+
+        // Update the image
+        this.updateImage(this.editingImageTarget, editedImageData);
+
+        // Close modal
+        document.getElementById('image-editor-modal').style.display = 'none';
+
+        alert('Image updated successfully!');
     }
 }
 

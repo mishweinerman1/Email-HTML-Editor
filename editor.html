@@ -120,6 +120,7 @@ WATCH SMART</textarea>
                             <div class="image-buttons">
                                 <button class="btn-small btn-secondary" onclick="document.getElementById('hero-image-upload').click()">Upload</button>
                                 <button class="btn-small btn-secondary" data-image-target="hero-image" data-image-type="hero">Generate</button>
+                                <button class="btn-small btn-secondary" data-edit-target="hero-image">Edit</button>
                                 <input type="file" id="hero-image-upload" accept="image/*" style="display: none;" data-image-target="hero-image">
                             </div>
                         </div>
@@ -135,6 +136,7 @@ WATCH SMART</textarea>
                             <div class="image-buttons">
                                 <button class="btn-small btn-secondary" onclick="document.getElementById('product-image-upload').click()">Upload</button>
                                 <button class="btn-small btn-secondary" data-image-target="product-image" data-image-type="product">Generate</button>
+                                <button class="btn-small btn-secondary" data-edit-target="product-image">Edit</button>
                                 <input type="file" id="product-image-upload" accept="image/*" style="display: none;" data-image-target="product-image">
                             </div>
                         </div>
@@ -150,6 +152,7 @@ WATCH SMART</textarea>
                             <div class="image-buttons">
                                 <button class="btn-small btn-secondary" onclick="document.getElementById('feature-icon-1-upload').click()">Upload</button>
                                 <button class="btn-small btn-secondary" data-image-target="feature-icon-1" data-image-type="icon">Generate</button>
+                                <button class="btn-small btn-secondary" data-edit-target="feature-icon-1">Edit</button>
                                 <input type="file" id="feature-icon-1-upload" accept="image/*" style="display: none;" data-image-target="feature-icon-1">
                             </div>
                         </div>
@@ -164,6 +167,7 @@ WATCH SMART</textarea>
                             <div class="image-buttons">
                                 <button class="btn-small btn-secondary" onclick="document.getElementById('feature-icon-2-upload').click()">Upload</button>
                                 <button class="btn-small btn-secondary" data-image-target="feature-icon-2" data-image-type="icon">Generate</button>
+                                <button class="btn-small btn-secondary" data-edit-target="feature-icon-2">Edit</button>
                                 <input type="file" id="feature-icon-2-upload" accept="image/*" style="display: none;" data-image-target="feature-icon-2">
                             </div>
                         </div>
@@ -178,6 +182,7 @@ WATCH SMART</textarea>
                             <div class="image-buttons">
                                 <button class="btn-small btn-secondary" onclick="document.getElementById('feature-icon-3-upload').click()">Upload</button>
                                 <button class="btn-small btn-secondary" data-image-target="feature-icon-3" data-image-type="icon">Generate</button>
+                                <button class="btn-small btn-secondary" data-edit-target="feature-icon-3">Edit</button>
                                 <input type="file" id="feature-icon-3-upload" accept="image/*" style="display: none;" data-image-target="feature-icon-3">
                             </div>
                         </div>
@@ -259,6 +264,84 @@ WATCH SMART</textarea>
             <div class="preview-content">
                 <div class="preview-wrapper" id="preview-wrapper">
                     <iframe id="preview-frame" src="email-template.html"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Editor Modal -->
+    <div id="image-editor-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Edit Image</h3>
+                <button class="modal-close" onclick="document.getElementById('image-editor-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="editor-layout">
+                    <!-- Canvas Area -->
+                    <div class="canvas-area">
+                        <canvas id="image-editor-canvas"></canvas>
+                    </div>
+
+                    <!-- Editing Controls -->
+                    <div class="editing-controls">
+                        <h4>Crop</h4>
+                        <div class="control-group">
+                            <button id="start-crop-btn" class="btn btn-secondary full-width">Start Cropping</button>
+                            <button id="apply-crop-btn" class="btn btn-primary full-width" style="display: none;">Apply Crop</button>
+                            <button id="cancel-crop-btn" class="btn btn-secondary full-width" style="display: none;">Cancel Crop</button>
+                        </div>
+
+                        <h4>Text Overlay</h4>
+                        <div class="control-group">
+                            <label for="overlay-text">Text</label>
+                            <input type="text" id="overlay-text" placeholder="Enter text...">
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-size">Size</label>
+                            <input type="range" id="overlay-text-size" min="12" max="120" value="48">
+                            <span id="text-size-value">48px</span>
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-color">Color</label>
+                            <input type="color" id="overlay-text-color" value="#ffffff">
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-position">Position</label>
+                            <select id="overlay-text-position">
+                                <option value="top">Top</option>
+                                <option value="center" selected>Center</option>
+                                <option value="bottom">Bottom</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <button id="add-text-overlay-btn" class="btn btn-secondary full-width">Add Text Overlay</button>
+                        </div>
+
+                        <h4>Color Overlay</h4>
+                        <div class="control-group">
+                            <label for="color-overlay-color">Color</label>
+                            <input type="color" id="color-overlay-color" value="#000000">
+                        </div>
+                        <div class="control-group">
+                            <label for="color-overlay-opacity">Opacity</label>
+                            <input type="range" id="color-overlay-opacity" min="0" max="100" value="50">
+                            <span id="opacity-value">50%</span>
+                        </div>
+                        <div class="control-group">
+                            <button id="add-color-overlay-btn" class="btn btn-secondary full-width">Add Color Overlay</button>
+                            <button id="remove-color-overlay-btn" class="btn btn-secondary full-width">Remove Color Overlay</button>
+                        </div>
+
+                        <h4>Actions</h4>
+                        <div class="control-group">
+                            <button id="reset-image-btn" class="btn btn-secondary full-width">Reset to Original</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="save-edited-image-btn" class="btn btn-primary">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('image-editor-modal').style.display='none'">Cancel</button>
                 </div>
             </div>
         </div>

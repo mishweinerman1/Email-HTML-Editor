@@ -8,6 +8,7 @@ A hybrid email template and visual editor system for creating and customizing pr
 - **Customizable Themes**: Easy color and typography customization
 - **Image Management**: Upload custom images or generate them with AI
 - **AI Image Generation**: Generate images using DALL-E, Unsplash, or placeholders
+- **Image Editing**: Built-in image editor with cropping, text overlays, and color overlays
 - **Responsive Design**: Mobile-first approach with preview controls for different screen sizes
 - **Email-Compatible HTML**: Table-based layout with inline styles for maximum email client compatibility
 - **Configuration System**: Save and load theme configurations as JSON files (including images)
@@ -108,6 +109,52 @@ The editor provides two ways to add images to your email template:
 - Feature Icons (60x60px each)
 
 All images are automatically converted to base64 format and embedded directly in the HTML, ensuring they display in email clients without requiring external hosting.
+
+### Editing Images
+
+After uploading or generating an image, you can edit it using the built-in image editor:
+
+1. Click the **Edit** button next to any image
+2. The image editor modal will open with your image on a canvas
+
+#### Cropping Images
+
+1. Click **Start Cropping**
+2. Click and drag on the canvas to select the area you want to keep
+3. Click **Apply Crop** to crop the image, or **Cancel Crop** to exit without cropping
+
+#### Adding Text Overlays
+
+1. Enter your text in the "Text" field
+2. Adjust the text size using the slider (12-120px)
+3. Choose a text color with the color picker
+4. Select a position (Top, Center, or Bottom)
+5. Click **Add Text Overlay**
+
+Text overlays are great for:
+- Adding promotional text to hero images
+- Labeling product features
+- Creating call-to-action overlays
+
+#### Adding Color Overlays
+
+1. Choose a color with the color picker
+2. Adjust the opacity using the slider (0-100%)
+3. Click **Add Color Overlay**
+4. To remove the overlay, click **Remove Color Overlay**
+
+Color overlays are useful for:
+- Darkening images to make white text more readable
+- Creating tinted effects
+- Matching image tone to your brand colors
+
+#### Other Controls
+
+- **Reset to Original**: Reverts all changes and restores the original image
+- **Save Changes**: Applies all edits and updates the email template
+- **Cancel**: Closes the editor without saving changes
+
+**Note**: All edits are non-destructive until you click "Save Changes". You can always reset to the original image.
 
 ### Saving and Loading Configurations
 
@@ -311,6 +358,14 @@ For issues or questions, please refer to:
 - Email client compatibility: [caniemail.com](https://www.caniemail.com/)
 
 ## Changelog
+
+### Version 1.2.0
+- Added built-in image editor with canvas-based editing
+- Cropping functionality with drag-to-select interface
+- Text overlay support with customizable size, color, and position
+- Color overlay support with adjustable opacity
+- Non-destructive editing with reset capability
+- Edit button for all images (hero, product, icons)
 
 ### Version 1.1.0
 - Added image upload functionality
