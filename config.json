@@ -1,0 +1,28 @@
+{
+  "colors": {
+    "primary": "#000000",
+    "secondary": "#ffffff",
+    "text": "#333333",
+    "background": "#ffffff"
+  },
+  "fonts": {
+    "heading": "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    "body": "'Helvetica Neue', Helvetica, Arial, sans-serif"
+  },
+  "content": {
+    "logoText": "GANANCE",
+    "heroTitle": "MAKE YOUR FAVORITE\nWATCH SMART",
+    "productName": "Ganance Heir (Pre-Order)",
+    "productDescription": "Transform any traditional watch into a smart timepiece with the Ganance Heir. Our innovative technology seamlessly integrates with your favorite watches, adding smart features without compromising their classic design.",
+    "ctaText": "PRE-ORDER NOW",
+    "featuresTitle": "Your Style. Our Tech."
+  },
+  "components": {
+    "header": true,
+    "hero": true,
+    "productIntro": true,
+    "productDetail": true,
+    "features": true,
+    "footer": true
+  }
+}

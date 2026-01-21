@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template Editor - Ganance Heir</title>
+    <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Control Panel Sidebar -->
+        <div class="control-panel">
+            <div class="panel-header">
+                <h1>Email Editor</h1>
+                <p class="subtitle">Customize your email template</p>
+            </div>
+
+            <div class="panel-content">
+                <!-- Color Controls -->
+                <section class="control-section">
+                    <h2 class="section-title">Colors</h2>
+                    <div class="control-group">
+                        <label for="primary-color">Primary Color</label>
+                        <div class="color-input-group">
+                            <input type="color" id="primary-color" value="#000000">
+                            <input type="text" id="primary-color-text" value="#000000" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="secondary-color">Secondary Color</label>
+                        <div class="color-input-group">
+                            <input type="color" id="secondary-color" value="#ffffff">
+                            <input type="text" id="secondary-color-text" value="#ffffff" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="text-color">Text Color</label>
+                        <div class="color-input-group">
+                            <input type="color" id="text-color" value="#333333">
+                            <input type="text" id="text-color-text" value="#333333" maxlength="7">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="background-color">Background Color</label>
+                        <div class="color-input-group">
+                            <input type="color" id="background-color" value="#ffffff">
+                            <input type="text" id="background-color-text" value="#ffffff" maxlength="7">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Typography Controls -->
+                <section class="control-section">
+                    <h2 class="section-title">Typography</h2>
+                    <div class="control-group">
+                        <label for="heading-font">Heading Font</label>
+                        <select id="heading-font">
+                            <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">Helvetica</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="body-font">Body Font</label>
+                        <select id="body-font">
+                            <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">Helvetica</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Content Controls -->
+                <section class="control-section">
+                    <h2 class="section-title">Content</h2>
+                    <div class="control-group">
+                        <label for="logo-text">Logo Text</label>
+                        <input type="text" id="logo-text" value="GANANCE">
+                    </div>
+                    <div class="control-group">
+                        <label for="hero-title">Hero Title</label>
+                        <textarea id="hero-title" rows="2">MAKE YOUR FAVORITE
+WATCH SMART</textarea>
+                    </div>
+                    <div class="control-group">
+                        <label for="product-name">Product Name</label>
+                        <input type="text" id="product-name" value="Ganance Heir (Pre-Order)">
+                    </div>
+                    <div class="control-group">
+                        <label for="product-description">Product Description</label>
+                        <textarea id="product-description" rows="4">Transform any traditional watch into a smart timepiece with the Ganance Heir. Our innovative technology seamlessly integrates with your favorite watches, adding smart features without compromising their classic design.</textarea>
+                    </div>
+                    <div class="control-group">
+                        <label for="cta-text">CTA Button Text</label>
+                        <input type="text" id="cta-text" value="PRE-ORDER NOW">
+                    </div>
+                    <div class="control-group">
+                        <label for="features-title">Features Section Title</label>
+                        <input type="text" id="features-title" value="Your Style. Our Tech.">
+                    </div>
+                </section>
+
+                <!-- Component Visibility -->
+                <section class="control-section">
+                    <h2 class="section-title">Components</h2>
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="show-header" checked>
+                            Show Header
+                        </label>
+                    </div>
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="show-hero" checked>
+                            Show Hero Section
+                        </label>
+                    </div>
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="show-product-intro" checked>
+                            Show Product Intro
+                        </label>
+                    </div>
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="show-product-detail" checked>
+                            Show Product Details
+                        </label>
+                    </div>
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="show-features" checked>
+                            Show Features Section
+                        </label>
+                    </div>
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="show-footer" checked>
+                            Show Footer
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Responsive Preview Controls -->
+                <section class="control-section">
+                    <h2 class="section-title">Preview Size</h2>
+                    <div class="preview-controls">
+                        <button class="preview-btn active" data-width="100%">Desktop</button>
+                        <button class="preview-btn" data-width="768px">Tablet</button>
+                        <button class="preview-btn" data-width="375px">Mobile</button>
+                    </div>
+                </section>
+
+                <!-- Export/Import Controls -->
+                <section class="control-section">
+                    <h2 class="section-title">Actions</h2>
+                    <div class="action-buttons">
+                        <button id="export-html" class="btn btn-primary">Export HTML</button>
+                        <button id="save-config" class="btn btn-secondary">Save Config</button>
+                        <button id="load-config" class="btn btn-secondary">Load Config</button>
+                        <input type="file" id="config-file" accept=".json" style="display: none;">
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="preview-header">
+                <h2>Live Preview</h2>
+                <div class="preview-info">
+                    <span id="preview-size-label">Desktop View</span>
+                </div>
+            </div>
+            <div class="preview-content">
+                <div class="preview-wrapper" id="preview-wrapper">
+                    <iframe id="preview-frame" src="email-template.html"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>
