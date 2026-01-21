@@ -130,11 +130,18 @@ After uploading or generating an image, you can edit it using the built-in image
 3. Choose a text color with the color picker
 4. Select a position (Top, Center, or Bottom)
 5. Click **Add Text Overlay**
+6. To add more text, enter new text and click **Add Text Overlay** again
+
+**Managing Text Overlays:**
+- **Undo Last Text**: Removes the most recently added text overlay (appears after adding text)
+- **Clear All Text**: Removes all text overlays at once (appears after adding text)
+- You can add multiple text overlays in different positions
 
 Text overlays are great for:
 - Adding promotional text to hero images
 - Labeling product features
 - Creating call-to-action overlays
+- Adding multiple text elements at different positions
 
 #### Adding Color Overlays
 

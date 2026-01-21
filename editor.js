@@ -95,8 +95,17 @@ class EmailEditor {
         }
 
         const addTextOverlayBtn = document.getElementById('add-text-overlay-btn');
+        const undoTextOverlayBtn = document.getElementById('undo-text-overlay-btn');
+        const clearTextOverlaysBtn = document.getElementById('clear-text-overlays-btn');
+
         if (addTextOverlayBtn) {
             addTextOverlayBtn.addEventListener('click', () => this.addTextOverlay());
+        }
+        if (undoTextOverlayBtn) {
+            undoTextOverlayBtn.addEventListener('click', () => this.undoTextOverlay());
+        }
+        if (clearTextOverlaysBtn) {
+            clearTextOverlaysBtn.addEventListener('click', () => this.clearAllTextOverlays());
         }
 
         // Color overlay controls with real-time preview
@@ -739,6 +748,10 @@ class EmailEditor {
             // Store working canvas state
             this.workingImageData = ctx.getImageData(0, 0, width, height);
             this.colorOverlayActive = false;
+
+            // Initialize text overlay history
+            this.textOverlayHistory = [];
+            this.updateTextOverlayButtons();
         };
         img.src = imageData;
     }
@@ -943,6 +956,10 @@ class EmailEditor {
         const canvas = document.getElementById('image-editor-canvas');
         const ctx = canvas.getContext('2d');
 
+        // Save current state before adding text
+        const beforeState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        this.textOverlayHistory.push(beforeState);
+
         const fontSize = document.getElementById('overlay-text-size').value;
         const color = document.getElementById('overlay-text-color').value;
         const position = document.getElementById('overlay-text-position').value;
@@ -976,6 +993,80 @@ class EmailEditor {
 
         // Update working image data
         this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // Update button visibility
+        this.updateTextOverlayButtons();
+
+        // Clear the text input for next overlay
+        document.getElementById('overlay-text').value = '';
+    }
+
+    undoTextOverlay() {
+        if (this.textOverlayHistory.length === 0) {
+            return;
+        }
+
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Restore the state before the last text overlay
+        const previousState = this.textOverlayHistory.pop();
+        ctx.putImageData(previousState, 0, 0);
+
+        // Update working image data
+        this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // Update button visibility
+        this.updateTextOverlayButtons();
+
+        // Restore color overlay if it was active
+        if (this.colorOverlayPreviewActive) {
+            this.updateColorOverlayPreview();
+        }
+    }
+
+    clearAllTextOverlays() {
+        if (this.textOverlayHistory.length === 0) {
+            return;
+        }
+
+        if (!confirm('Clear all text overlays? This will remove all text you\'ve added.')) {
+            return;
+        }
+
+        const canvas = document.getElementById('image-editor-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Restore the first saved state (before any text overlays)
+        const firstState = this.textOverlayHistory[0];
+        ctx.putImageData(firstState, 0, 0);
+
+        // Update working image data
+        this.workingImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        // Clear history
+        this.textOverlayHistory = [];
+
+        // Update button visibility
+        this.updateTextOverlayButtons();
+
+        // Restore color overlay if it was active
+        if (this.colorOverlayPreviewActive) {
+            this.updateColorOverlayPreview();
+        }
+    }
+
+    updateTextOverlayButtons() {
+        const undoBtn = document.getElementById('undo-text-overlay-btn');
+        const clearBtn = document.getElementById('clear-text-overlays-btn');
+
+        if (this.textOverlayHistory && this.textOverlayHistory.length > 0) {
+            if (undoBtn) undoBtn.style.display = 'block';
+            if (clearBtn) clearBtn.style.display = 'block';
+        } else {
+            if (undoBtn) undoBtn.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none';
+        }
     }
 
     updateColorOverlayPreview() {
@@ -1024,6 +1115,10 @@ class EmailEditor {
 
     resetImage() {
         if (!this.originalImage) return;
+
+        if (!confirm('Reset to original image? This will remove all edits (crops, text, overlays).')) {
+            return;
+        }
 
         // Reload original image
         this.loadImageToCanvas(this.originalImage.src);

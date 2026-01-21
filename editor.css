@@ -450,6 +450,11 @@ body {
 
 .full-width {
     width: 100%;
+    margin-top: 5px;
+}
+
+.full-width:first-child {
+    margin-top: 0;
 }
 
 .editing-controls input[type="range"] {
