@@ -9,11 +9,52 @@ class EmailEditor {
     }
 
     init() {
+        // Setup non-iframe event listeners immediately
+        this.setupImageControls();
+
         // Wait for iframe to load
         this.iframe.addEventListener('load', () => {
             this.setupEventListeners();
             this.loadConfig();
         });
+    }
+
+    setupImageControls() {
+        // Image upload controls
+        this.setupImageUpload('hero-image-upload');
+        this.setupImageUpload('product-image-upload');
+        this.setupImageUpload('feature-icon-1-upload');
+        this.setupImageUpload('feature-icon-2-upload');
+        this.setupImageUpload('feature-icon-3-upload');
+
+        // Image generation controls
+        document.querySelectorAll('button[data-image-target]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget.dataset.imageTarget;
+                const type = e.currentTarget.dataset.imageType;
+                console.log('Generate button clicked:', target, type);
+                this.openImageGenModal(target, type);
+            });
+        });
+
+        // Image service selector
+        const serviceSelect = document.getElementById('image-service');
+        if (serviceSelect) {
+            serviceSelect.addEventListener('change', (e) => {
+                const apiKeyGroup = document.getElementById('api-key-group');
+                if (e.target.value === 'dalle') {
+                    apiKeyGroup.style.display = 'block';
+                } else {
+                    apiKeyGroup.style.display = 'none';
+                }
+            });
+        }
+
+        // Generate image button
+        const generateBtn = document.getElementById('generate-image-btn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => this.generateImage());
+        }
     }
 
     getDefaultConfig() {
@@ -103,35 +144,6 @@ class EmailEditor {
             document.getElementById('config-file').click();
         });
         document.getElementById('config-file').addEventListener('change', (e) => this.loadConfigFile(e));
-
-        // Image upload controls
-        this.setupImageUpload('hero-image-upload');
-        this.setupImageUpload('product-image-upload');
-        this.setupImageUpload('feature-icon-1-upload');
-        this.setupImageUpload('feature-icon-2-upload');
-        this.setupImageUpload('feature-icon-3-upload');
-
-        // Image generation controls
-        document.querySelectorAll('button[data-image-target]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const target = e.target.dataset.imageTarget;
-                const type = e.target.dataset.imageType;
-                this.openImageGenModal(target, type);
-            });
-        });
-
-        // Image service selector
-        document.getElementById('image-service').addEventListener('change', (e) => {
-            const apiKeyGroup = document.getElementById('api-key-group');
-            if (e.target.value === 'dalle') {
-                apiKeyGroup.style.display = 'block';
-            } else {
-                apiKeyGroup.style.display = 'none';
-            }
-        });
-
-        // Generate image button
-        document.getElementById('generate-image-btn').addEventListener('click', () => this.generateImage());
     }
 
     setupColorControl(inputId, cssVar) {
@@ -442,6 +454,7 @@ class EmailEditor {
     }
 
     openImageGenModal(target, type) {
+        console.log('Opening image gen modal for:', target, type);
         this.currentImageTarget = target;
         this.currentImageType = type;
 
@@ -453,10 +466,18 @@ class EmailEditor {
             'icon': 'Simple minimalist icon, flat design, modern'
         };
 
-        promptInput.value = defaultPrompts[type] || '';
+        if (promptInput) {
+            promptInput.value = defaultPrompts[type] || '';
+        }
 
         // Show modal
-        document.getElementById('image-gen-modal').style.display = 'flex';
+        const modal = document.getElementById('image-gen-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            console.log('Modal should now be visible');
+        } else {
+            console.error('Modal element not found!');
+        }
     }
 
     async generateImage() {
