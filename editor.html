@@ -106,6 +106,84 @@ WATCH SMART</textarea>
                     </div>
                 </section>
 
+                <!-- Image Management -->
+                <section class="control-section">
+                    <h2 class="section-title">Images</h2>
+
+                    <!-- Hero Image -->
+                    <div class="control-group">
+                        <label>Hero Image</label>
+                        <div class="image-control">
+                            <div class="image-preview" id="hero-image-preview">
+                                <span class="placeholder-text">No image</span>
+                            </div>
+                            <div class="image-buttons">
+                                <button class="btn-small btn-secondary" onclick="document.getElementById('hero-image-upload').click()">Upload</button>
+                                <button class="btn-small btn-secondary" data-image-target="hero-image" data-image-type="hero">Generate</button>
+                                <input type="file" id="hero-image-upload" accept="image/*" style="display: none;" data-image-target="hero-image">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Detail Image -->
+                    <div class="control-group">
+                        <label>Product Detail Image</label>
+                        <div class="image-control">
+                            <div class="image-preview" id="product-image-preview">
+                                <span class="placeholder-text">No image</span>
+                            </div>
+                            <div class="image-buttons">
+                                <button class="btn-small btn-secondary" onclick="document.getElementById('product-image-upload').click()">Upload</button>
+                                <button class="btn-small btn-secondary" data-image-target="product-image" data-image-type="product">Generate</button>
+                                <input type="file" id="product-image-upload" accept="image/*" style="display: none;" data-image-target="product-image">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature Icons -->
+                    <div class="control-group">
+                        <label>Feature Icon 1</label>
+                        <div class="image-control">
+                            <div class="image-preview small" id="feature-icon-1-preview">
+                                <span class="placeholder-text">Icon</span>
+                            </div>
+                            <div class="image-buttons">
+                                <button class="btn-small btn-secondary" onclick="document.getElementById('feature-icon-1-upload').click()">Upload</button>
+                                <button class="btn-small btn-secondary" data-image-target="feature-icon-1" data-image-type="icon">Generate</button>
+                                <input type="file" id="feature-icon-1-upload" accept="image/*" style="display: none;" data-image-target="feature-icon-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Feature Icon 2</label>
+                        <div class="image-control">
+                            <div class="image-preview small" id="feature-icon-2-preview">
+                                <span class="placeholder-text">Icon</span>
+                            </div>
+                            <div class="image-buttons">
+                                <button class="btn-small btn-secondary" onclick="document.getElementById('feature-icon-2-upload').click()">Upload</button>
+                                <button class="btn-small btn-secondary" data-image-target="feature-icon-2" data-image-type="icon">Generate</button>
+                                <input type="file" id="feature-icon-2-upload" accept="image/*" style="display: none;" data-image-target="feature-icon-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Feature Icon 3</label>
+                        <div class="image-control">
+                            <div class="image-preview small" id="feature-icon-3-preview">
+                                <span class="placeholder-text">Icon</span>
+                            </div>
+                            <div class="image-buttons">
+                                <button class="btn-small btn-secondary" onclick="document.getElementById('feature-icon-3-upload').click()">Upload</button>
+                                <button class="btn-small btn-secondary" data-image-target="feature-icon-3" data-image-type="icon">Generate</button>
+                                <input type="file" id="feature-icon-3-upload" accept="image/*" style="display: none;" data-image-target="feature-icon-3">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Component Visibility -->
                 <section class="control-section">
                     <h2 class="section-title">Components</h2>
@@ -182,6 +260,40 @@ WATCH SMART</textarea>
                 <div class="preview-wrapper" id="preview-wrapper">
                     <iframe id="preview-frame" src="email-template.html"></iframe>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Image Generation Modal -->
+    <div id="image-gen-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Generate AI Image</h3>
+                <button class="modal-close" onclick="document.getElementById('image-gen-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label for="image-prompt">Image Prompt</label>
+                    <textarea id="image-prompt" rows="3" placeholder="Describe the image you want to generate..."></textarea>
+                </div>
+                <div class="control-group">
+                    <label for="image-service">Service</label>
+                    <select id="image-service">
+                        <option value="placeholder">Placeholder (Free)</option>
+                        <option value="unsplash">Unsplash (Free Stock Photos)</option>
+                        <option value="dalle">DALL-E (Requires API Key)</option>
+                    </select>
+                </div>
+                <div class="control-group" id="api-key-group" style="display: none;">
+                    <label for="openai-api-key">OpenAI API Key</label>
+                    <input type="password" id="openai-api-key" placeholder="sk-...">
+                    <small>Your API key is stored locally and never sent anywhere except OpenAI</small>
+                </div>
+                <div class="modal-actions">
+                    <button id="generate-image-btn" class="btn btn-primary">Generate Image</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('image-gen-modal').style.display='none'">Cancel</button>
+                </div>
+                <div id="generation-status" class="generation-status"></div>
             </div>
         </div>
     </div>

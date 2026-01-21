@@ -43,7 +43,8 @@ class EmailEditor {
                 productDetail: true,
                 features: true,
                 footer: true
-            }
+            },
+            images: {}
         };
     }
 
@@ -102,6 +103,35 @@ class EmailEditor {
             document.getElementById('config-file').click();
         });
         document.getElementById('config-file').addEventListener('change', (e) => this.loadConfigFile(e));
+
+        // Image upload controls
+        this.setupImageUpload('hero-image-upload');
+        this.setupImageUpload('product-image-upload');
+        this.setupImageUpload('feature-icon-1-upload');
+        this.setupImageUpload('feature-icon-2-upload');
+        this.setupImageUpload('feature-icon-3-upload');
+
+        // Image generation controls
+        document.querySelectorAll('button[data-image-target]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.target.dataset.imageTarget;
+                const type = e.target.dataset.imageType;
+                this.openImageGenModal(target, type);
+            });
+        });
+
+        // Image service selector
+        document.getElementById('image-service').addEventListener('change', (e) => {
+            const apiKeyGroup = document.getElementById('api-key-group');
+            if (e.target.value === 'dalle') {
+                apiKeyGroup.style.display = 'block';
+            } else {
+                apiKeyGroup.style.display = 'none';
+            }
+        });
+
+        // Generate image button
+        document.getElementById('generate-image-btn').addEventListener('click', () => this.generateImage());
     }
 
     setupColorControl(inputId, cssVar) {
@@ -338,11 +368,215 @@ class EmailEditor {
                 }
             });
         }
+
+        // Apply images
+        if (config.images) {
+            Object.keys(config.images).forEach(key => {
+                if (config.images[key]) {
+                    this.updateImage(key, config.images[key]);
+                }
+            });
+        }
     }
 
     loadConfig() {
         // Apply default config on load
         this.applyConfig(this.config);
+    }
+
+    setupImageUpload(uploadId) {
+        const uploadInput = document.getElementById(uploadId);
+        if (!uploadInput) return;
+
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const imageData = event.target.result;
+                const targetId = uploadInput.dataset.imageTarget;
+                this.updateImage(targetId, imageData);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    updateImage(targetId, imageData) {
+        // Update preview thumbnail
+        const preview = document.getElementById(`${targetId}-preview`);
+        if (preview) {
+            preview.innerHTML = `<img src="${imageData}" alt="Preview">`;
+        }
+
+        // Update image in iframe
+        try {
+            const doc = this.iframe.contentDocument || this.iframe.contentWindow.document;
+            let selector;
+
+            // Map target IDs to data-editable attributes
+            const imageMap = {
+                'hero-image': 'hero-image',
+                'product-image': 'product-image',
+                'feature-icon-1': 'feature-icon-1',
+                'feature-icon-2': 'feature-icon-2',
+                'feature-icon-3': 'feature-icon-3'
+            };
+
+            selector = `[data-editable="${imageMap[targetId]}"]`;
+            const imgElement = doc.querySelector(selector);
+
+            if (imgElement) {
+                imgElement.src = imageData;
+            }
+
+            // Store in config
+            if (!this.config.images) {
+                this.config.images = {};
+            }
+            this.config.images[targetId] = imageData;
+
+        } catch (error) {
+            console.error('Error updating image:', error);
+        }
+    }
+
+    openImageGenModal(target, type) {
+        this.currentImageTarget = target;
+        this.currentImageType = type;
+
+        // Set default prompt based on type
+        const promptInput = document.getElementById('image-prompt');
+        const defaultPrompts = {
+            'hero': 'A luxury smartwatch on a wrist, modern and elegant, professional product photography',
+            'product': 'Close-up of a smartwatch device, sleek design, high quality product shot',
+            'icon': 'Simple minimalist icon, flat design, modern'
+        };
+
+        promptInput.value = defaultPrompts[type] || '';
+
+        // Show modal
+        document.getElementById('image-gen-modal').style.display = 'flex';
+    }
+
+    async generateImage() {
+        const prompt = document.getElementById('image-prompt').value;
+        const service = document.getElementById('image-service').value;
+        const statusDiv = document.getElementById('generation-status');
+
+        if (!prompt.trim()) {
+            this.showStatus('Please enter a prompt', 'error');
+            return;
+        }
+
+        statusDiv.className = 'generation-status show loading';
+        statusDiv.textContent = 'Generating image...';
+
+        try {
+            let imageUrl;
+
+            switch (service) {
+                case 'placeholder':
+                    imageUrl = await this.generatePlaceholder();
+                    break;
+                case 'unsplash':
+                    imageUrl = await this.generateFromUnsplash(prompt);
+                    break;
+                case 'dalle':
+                    imageUrl = await this.generateFromDALLE(prompt);
+                    break;
+            }
+
+            if (imageUrl) {
+                // Convert to base64 for embedding
+                const base64Image = await this.imageUrlToBase64(imageUrl);
+                this.updateImage(this.currentImageTarget, base64Image);
+                this.showStatus('Image generated successfully!', 'success');
+
+                setTimeout(() => {
+                    document.getElementById('image-gen-modal').style.display = 'none';
+                    statusDiv.className = 'generation-status';
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Error generating image:', error);
+            this.showStatus('Error generating image: ' + error.message, 'error');
+        }
+    }
+
+    async generatePlaceholder() {
+        // Generate a colored placeholder based on image type
+        const dimensions = this.currentImageType === 'icon' ? '60x60' : '600x400';
+        const colors = ['667eea', '764ba2', 'f093fb', '4facfe'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        return `https://via.placeholder.com/${dimensions}/${randomColor}/ffffff?text=Generated+Image`;
+    }
+
+    async generateFromUnsplash(prompt) {
+        // Use Unsplash Source API for random images based on search term
+        const searchTerm = encodeURIComponent(prompt.split(' ').slice(0, 3).join(','));
+        const dimensions = this.currentImageType === 'icon' ? '60x60' : '600x400';
+
+        // Note: This uses the deprecated source.unsplash.com API
+        // For production, you should use the official Unsplash API with an API key
+        return `https://source.unsplash.com/${dimensions}/?${searchTerm}`;
+    }
+
+    async generateFromDALLE(prompt) {
+        const apiKey = document.getElementById('openai-api-key').value;
+
+        if (!apiKey) {
+            throw new Error('Please enter your OpenAI API key');
+        }
+
+        const size = this.currentImageType === 'icon' ? '256x256' : '1024x1024';
+
+        const response = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: size
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || 'Failed to generate image');
+        }
+
+        const data = await response.json();
+        return data.data[0].url;
+    }
+
+    async imageUrlToBase64(url) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.error('Error converting image to base64:', error);
+            // If conversion fails, return the URL directly
+            return url;
+        }
+    }
+
+    showStatus(message, type) {
+        const statusDiv = document.getElementById('generation-status');
+        statusDiv.className = `generation-status show ${type}`;
+        statusDiv.textContent = message;
     }
 }
 

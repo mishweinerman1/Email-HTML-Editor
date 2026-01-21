@@ -6,11 +6,13 @@ A hybrid email template and visual editor system for creating and customizing pr
 
 - **Visual Email Editor**: Real-time WYSIWYG editor with live preview
 - **Customizable Themes**: Easy color and typography customization
+- **Image Management**: Upload custom images or generate them with AI
+- **AI Image Generation**: Generate images using DALL-E, Unsplash, or placeholders
 - **Responsive Design**: Mobile-first approach with preview controls for different screen sizes
 - **Email-Compatible HTML**: Table-based layout with inline styles for maximum email client compatibility
-- **Configuration System**: Save and load theme configurations as JSON files
+- **Configuration System**: Save and load theme configurations as JSON files (including images)
 - **Component Toggle**: Show/hide email sections as needed
-- **Export Functionality**: Download production-ready HTML with inline styles
+- **Export Functionality**: Download production-ready HTML with embedded images
 
 ## Project Structure
 
@@ -67,9 +69,45 @@ Then navigate to `http://localhost:8000/editor.html`
 2. **Customize Colors**: Use the color pickers in the "Colors" section to adjust your theme
 3. **Change Typography**: Select different fonts for headings and body text
 4. **Edit Content**: Update text content in the "Content" section
-5. **Toggle Components**: Show or hide email sections using the "Components" checkboxes
-6. **Preview Responsively**: Test your email at different screen sizes (Desktop/Tablet/Mobile)
-7. **Export HTML**: Click "Export HTML" to download your customized email template
+5. **Manage Images**: Upload or generate images (see Image Management below)
+6. **Toggle Components**: Show or hide email sections using the "Components" checkboxes
+7. **Preview Responsively**: Test your email at different screen sizes (Desktop/Tablet/Mobile)
+8. **Export HTML**: Click "Export HTML" to download your customized email template
+
+### Image Management
+
+The editor provides two ways to add images to your email template:
+
+#### Uploading Images
+
+1. Click the **Upload** button next to any image control
+2. Select an image file from your computer
+3. The image will be converted to base64 and embedded in the email
+4. Preview updates automatically
+
+#### Generating Images with AI
+
+1. Click the **Generate** button next to any image control
+2. Enter a descriptive prompt for the image you want
+3. Choose a generation service:
+   - **Placeholder** (Free): Creates a simple colored placeholder
+   - **Unsplash** (Free): Searches Unsplash for matching stock photos
+   - **DALL-E** (Requires API Key): Generates custom AI images using OpenAI's DALL-E
+4. Click **Generate Image**
+5. The generated image will be embedded in your email
+
+**Note about DALL-E**: To use DALL-E, you need an OpenAI API key:
+- Sign up at [platform.openai.com](https://platform.openai.com)
+- Create an API key in your account settings
+- Enter it in the editor when generating images
+- Your API key is stored locally and only sent to OpenAI
+
+**Supported Images**:
+- Hero Image (600x400px recommended)
+- Product Detail Image (270x270px recommended)
+- Feature Icons (60x60px each)
+
+All images are automatically converted to base64 format and embedded directly in the HTML, ensuring they display in email clients without requiring external hosting.
 
 ### Saving and Loading Configurations
 
@@ -114,9 +152,18 @@ The `config.json` file uses the following structure:
     "productDetail": true,
     "features": true,
     "footer": true
+  },
+  "images": {
+    "hero-image": "data:image/jpeg;base64,...",
+    "product-image": "data:image/jpeg;base64,...",
+    "feature-icon-1": "data:image/png;base64,...",
+    "feature-icon-2": "data:image/png;base64,...",
+    "feature-icon-3": "data:image/png;base64,..."
   }
 }
 ```
+
+**Note**: Images are stored as base64-encoded data URLs. Config files with images may be large (500KB - 2MB depending on image sizes).
 
 ## Email Template Structure
 
@@ -136,22 +183,29 @@ All sections use:
 - Data attributes for easy editing
 - Responsive design with media queries
 
-## Adding Images
+## Working with Images
 
-To add your own images:
+The editor provides built-in image management, so you don't need to manually add images to the `images/` directory. Instead, use the visual editor to:
 
-1. Place image files in the `images/` directory
-2. Update the image sources in `email-template.html`:
-   - `images/hero-image.jpg` - Hero section background
-   - `images/product-detail.jpg` - Product detail image
-   - `images/icon-compatibility.png` - Feature icon 1
-   - `images/icon-smart.png` - Feature icon 2
-   - `images/icon-design.png` - Feature icon 3
+- **Upload your own images**: Click "Upload" buttons in the Images section
+- **Generate AI images**: Click "Generate" buttons to create images from text prompts
 
-Recommended image specifications:
-- Hero image: 600px width minimum
-- Product detail: 270px x 270px
-- Feature icons: 60px x 60px
+Images are automatically embedded as base64 data in the exported HTML, eliminating the need for external hosting.
+
+### Image Specifications
+
+For best results, use these dimensions:
+- **Hero image**: 600px width minimum (maintains aspect ratio)
+- **Product detail**: 270x270px (square)
+- **Feature icons**: 60x60px (small squares)
+
+### External Image Hosting (Optional)
+
+If you prefer to host images externally instead of embedding them:
+
+1. Upload images to your hosting service (CDN, web server, etc.)
+2. Get the public URL for each image
+3. Manually edit the exported HTML to replace base64 data with URLs
 
 ## Email Client Compatibility
 
@@ -257,6 +311,13 @@ For issues or questions, please refer to:
 - Email client compatibility: [caniemail.com](https://www.caniemail.com/)
 
 ## Changelog
+
+### Version 1.1.0
+- Added image upload functionality
+- Added AI image generation with multiple services (Placeholder, Unsplash, DALL-E)
+- Images now embedded as base64 in exported HTML
+- Image preview thumbnails in editor
+- Images included in configuration save/load
 
 ### Version 1.0.0
 - Initial release
