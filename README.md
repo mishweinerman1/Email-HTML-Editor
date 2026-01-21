@@ -125,17 +125,25 @@ After uploading or generating an image, you can edit it using the built-in image
 
 #### Adding Text Overlays
 
-1. Enter your text in the "Text" field
-2. Adjust the text size using the slider (12-120px)
-3. Choose a text color with the color picker
-4. Select a position (Top, Center, or Bottom)
-5. Click **Add Text Overlay**
-6. To add more text, enter new text and click **Add Text Overlay** again
+The text overlay feature includes live preview and comprehensive typography controls:
+
+**Setting Up Your Text:**
+1. Watch the **live preview** at the top - it shows exactly how your text will look
+2. Enter your text in the "Text" field
+3. Choose a **font family** (Arial, Helvetica, Times New Roman, Georgia, Impact, etc.)
+4. Select **font weight** (Normal, Bold, Extra Bold)
+5. Choose **font style** (Normal or Italic)
+6. Adjust the text size using the slider (12-120px)
+7. Choose a text color with the color picker
+8. Select **outline/stroke** style (Black Outline, White Outline, or No Outline)
+9. Select a position (Top, Center, or Bottom)
+10. Click **Add Text Overlay**
+11. To add more text with different fonts, enter new text and click **Add Text Overlay** again
 
 **Managing Text Overlays:**
 - **Undo Last Text**: Removes the most recently added text overlay (appears after adding text)
 - **Clear All Text**: Removes all text overlays at once (appears after adding text)
-- You can add multiple text overlays in different positions
+- You can add multiple text overlays with different fonts, sizes, and styles
 
 Text overlays are great for:
 - Adding promotional text to hero images
@@ -365,6 +373,16 @@ For issues or questions, please refer to:
 - Email client compatibility: [caniemail.com](https://www.caniemail.com/)
 
 ## Changelog
+
+### Version 1.3.0
+- Added comprehensive font controls for text overlays
+- Font family selection (10+ fonts including Arial, Impact, Georgia, etc.)
+- Font weight options (Normal, Bold, Extra Bold)
+- Font style options (Normal, Italic)
+- Outline/stroke options (Black, White, or None)
+- Live text preview with real-time font rendering
+- Undo and clear functions for text overlays
+- Text overlay history management
 
 ### Version 1.2.0
 - Added built-in image editor with canvas-based editing

@@ -91,8 +91,27 @@ class EmailEditor {
         if (textSizeSlider && textSizeValue) {
             textSizeSlider.addEventListener('input', (e) => {
                 textSizeValue.textContent = e.target.value + 'px';
+                this.updateTextPreview();
             });
         }
+
+        // Add listeners for all text controls to update preview
+        const textControls = [
+            'overlay-text',
+            'overlay-text-font',
+            'overlay-text-weight',
+            'overlay-text-style',
+            'overlay-text-color',
+            'overlay-text-stroke'
+        ];
+
+        textControls.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', () => this.updateTextPreview());
+                element.addEventListener('change', () => this.updateTextPreview());
+            }
+        });
 
         const addTextOverlayBtn = document.getElementById('add-text-overlay-btn');
         const undoTextOverlayBtn = document.getElementById('undo-text-overlay-btn');
@@ -107,6 +126,9 @@ class EmailEditor {
         if (clearTextOverlaysBtn) {
             clearTextOverlaysBtn.addEventListener('click', () => this.clearAllTextOverlays());
         }
+
+        // Initialize text preview
+        this.updateTextPreview();
 
         // Color overlay controls with real-time preview
         const opacitySlider = document.getElementById('color-overlay-opacity');
@@ -960,16 +982,25 @@ class EmailEditor {
         const beforeState = ctx.getImageData(0, 0, canvas.width, canvas.height);
         this.textOverlayHistory.push(beforeState);
 
+        // Get all text settings
         const fontSize = document.getElementById('overlay-text-size').value;
+        const fontFamily = document.getElementById('overlay-text-font').value;
+        const fontWeight = document.getElementById('overlay-text-weight').value;
+        const fontStyle = document.getElementById('overlay-text-style').value;
         const color = document.getElementById('overlay-text-color').value;
+        const strokeSetting = document.getElementById('overlay-text-stroke').value;
         const position = document.getElementById('overlay-text-position').value;
 
-        // Set text style
-        ctx.font = `bold ${fontSize}px Arial`;
+        // Set text style with font family, weight, and style
+        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
         ctx.fillStyle = color;
         ctx.textAlign = 'center';
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 2;
+
+        // Configure stroke/outline
+        if (strokeSetting !== 'none') {
+            ctx.strokeStyle = strokeSetting === 'black' ? '#000000' : '#ffffff';
+            ctx.lineWidth = Math.max(2, parseInt(fontSize) / 20);
+        }
 
         // Calculate position
         let x = canvas.width / 2;
@@ -987,8 +1018,10 @@ class EmailEditor {
                 break;
         }
 
-        // Draw text with stroke for visibility
-        ctx.strokeText(text, x, y);
+        // Draw text with stroke for visibility (if enabled)
+        if (strokeSetting !== 'none') {
+            ctx.strokeText(text, x, y);
+        }
         ctx.fillText(text, x, y);
 
         // Update working image data
@@ -1066,6 +1099,43 @@ class EmailEditor {
         } else {
             if (undoBtn) undoBtn.style.display = 'none';
             if (clearBtn) clearBtn.style.display = 'none';
+        }
+    }
+
+    updateTextPreview() {
+        const previewContent = document.getElementById('text-preview-content');
+        if (!previewContent) return;
+
+        // Get text
+        const text = document.getElementById('overlay-text').value || 'Your text here';
+
+        // Get font settings
+        const fontSize = document.getElementById('overlay-text-size').value;
+        const fontFamily = document.getElementById('overlay-text-font').value;
+        const fontWeight = document.getElementById('overlay-text-weight').value;
+        const fontStyle = document.getElementById('overlay-text-style').value;
+        const color = document.getElementById('overlay-text-color').value;
+        const strokeSetting = document.getElementById('overlay-text-stroke').value;
+
+        // Update preview
+        previewContent.textContent = text;
+        previewContent.style.fontFamily = fontFamily;
+        previewContent.style.fontSize = Math.min(parseInt(fontSize) / 2, 32) + 'px'; // Scale down for preview
+        previewContent.style.fontWeight = fontWeight;
+        previewContent.style.fontStyle = fontStyle;
+        previewContent.style.color = color;
+
+        // Apply text stroke/outline effect
+        if (strokeSetting !== 'none') {
+            const strokeColor = strokeSetting === 'black' ? '#000000' : '#ffffff';
+            previewContent.style.textShadow = `
+                -1px -1px 0 ${strokeColor},
+                1px -1px 0 ${strokeColor},
+                -1px 1px 0 ${strokeColor},
+                1px 1px 0 ${strokeColor}
+            `;
+        } else {
+            previewContent.style.textShadow = 'none';
         }
     }
 

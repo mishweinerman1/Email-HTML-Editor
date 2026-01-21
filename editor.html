@@ -294,8 +294,44 @@ WATCH SMART</textarea>
 
                         <h4>Text Overlay</h4>
                         <div class="control-group">
+                            <label>Preview</label>
+                            <div id="text-preview" class="text-preview">
+                                <span id="text-preview-content">Your text here</span>
+                            </div>
+                        </div>
+                        <div class="control-group">
                             <label for="overlay-text">Text</label>
                             <input type="text" id="overlay-text" placeholder="Enter text...">
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-font">Font Family</label>
+                            <select id="overlay-text-font">
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                                <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                                <option value="Georgia, serif">Georgia</option>
+                                <option value="'Courier New', Courier, monospace">Courier New</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                                <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                                <option value="Impact, fantasy">Impact</option>
+                                <option value="'Brush Script MT', cursive">Brush Script</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-weight">Font Weight</label>
+                            <select id="overlay-text-weight">
+                                <option value="normal">Normal</option>
+                                <option value="bold" selected>Bold</option>
+                                <option value="900">Extra Bold</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-style">Font Style</label>
+                            <select id="overlay-text-style">
+                                <option value="normal" selected>Normal</option>
+                                <option value="italic">Italic</option>
+                            </select>
                         </div>
                         <div class="control-group">
                             <label for="overlay-text-size">Size</label>
@@ -305,6 +341,14 @@ WATCH SMART</textarea>
                         <div class="control-group">
                             <label for="overlay-text-color">Color</label>
                             <input type="color" id="overlay-text-color" value="#ffffff">
+                        </div>
+                        <div class="control-group">
+                            <label for="overlay-text-stroke">Outline/Stroke</label>
+                            <select id="overlay-text-stroke">
+                                <option value="black" selected>Black Outline</option>
+                                <option value="white">White Outline</option>
+                                <option value="none">No Outline</option>
+                            </select>
                         </div>
                         <div class="control-group">
                             <label for="overlay-text-position">Position</label>
